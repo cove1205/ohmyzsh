@@ -25,10 +25,7 @@ alias pacown='pacman -Qo'
 alias pacupd="sudo pacman -Sy"
 
 function paclist() {
-  local pkgs=$(LC_ALL=C pacman -Qqe)
-  for pkg in ${(f)pkgs}; do
-      pacman -Qs --color=auto "^${pkg}\$" || break
-  done
+  pacman -Qqe | xargs -I{} -P0 --no-run-if-empty pacman -Qs --color=auto "^{}\$"
 }
 
 function pacdisowned() {
@@ -182,8 +179,8 @@ fi
 # Check Arch Linux PGP Keyring before System Upgrade to prevent failure.
 function upgrade() {
   echo ":: Checking Arch Linux PGP Keyring..."
-  local installedver="$(sudo pacman -Qi archlinux-keyring | grep -Po '(?<=Version         : ).*')"
-  local currentver="$(sudo pacman -Si archlinux-keyring | grep -Po '(?<=Version         : ).*')"
+  local installedver="$(LANG= sudo pacman -Qi archlinux-keyring | grep -Po '(?<=Version         : ).*')"
+  local currentver="$(LANG= sudo pacman -Si archlinux-keyring | grep -Po '(?<=Version         : ).*')"
   if [ $installedver != $currentver ]; then
     echo " Arch Linux PGP Keyring is out of date."
     echo " Updating before full system upgrade."
